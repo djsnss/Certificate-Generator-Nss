@@ -335,11 +335,10 @@ def overlay_name_on_template(name, event):
 
     img_width, img_height = template_img.size
 
-    # Adjust position (reduce y by ~50 pixels to position above the empty line)
     x = img_width / 2
     y = img_height / 2 - 50  
 
-    font = ImageFont.load_default(80)  # Fallback if font not found
+    font = ImageFont.truetype("times.ttf", 80)  # Fallback font with correct size
 
     draw.text((x, y), name, fill=(0, 0, 0), font=font, anchor="mm", align="center")
 
@@ -417,7 +416,8 @@ def main():
                 mime="application/pdf",
                 use_container_width=True
             )
-            send_email(user_input, event, email_input, pdf_buffer)
+            if st.button("Send Certificate via Email"):
+                send_email(user_input, event, email_input, pdf_buffer)
             st.success("📨 You will receive the certificate on your email shortly. Please be patient.")
         else:
             st.warning("⚠️ Please enter a valid name and email.")
