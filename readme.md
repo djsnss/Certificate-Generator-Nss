@@ -8,5 +8,5 @@ To set up and run the project, follow these steps:
 
 2. Run the application:
     ```sh
-    streamlit run app.py
+    streamlit run animate.py
     ```
