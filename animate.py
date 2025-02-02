@@ -358,7 +358,7 @@ def generate_pdf_with_image(name, event):
 
 def is_name_in_csv(name):
     try:
-        df = pd.read_csv("attendance/camp.csv")
+        df = pd.read_csv("attendance/nss_camp_2025.csv")
         df["Name"] = df["Name"].str.strip().str.lower()
         return name.strip().lower() in df["Name"].values
     except Exception as e:
