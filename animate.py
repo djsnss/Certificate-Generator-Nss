@@ -323,7 +323,6 @@ temp_css = """
 """
 st.markdown(temp_css, unsafe_allow_html=True)
 
-
 def overlay_name_on_template(name, event):
     templates = {
         "NSS Camp 2025": "templates/camp.jpg",  
@@ -333,12 +332,20 @@ def overlay_name_on_template(name, event):
     }
     template_img = Image.open(templates.get(event, "templates/various.jpg"))  
     draw = ImageDraw.Draw(template_img)
-    
+
     img_width, img_height = template_img.size
+
+    # Adjust position (reduce y by ~50 pixels to position above the empty line)
     x = img_width / 2
-    y = img_height / 2 - 80 
-    
-    draw.text((x, y), name, fill=(0, 0, 0))
+    y = img_height / 2 - 50  
+
+    try:
+        font = ImageFont.truetype("times.ttf", 80)  # More formal font
+    except:
+        font = ImageFont.load_default()  # Fallback if font not found
+
+    draw.text((x, y), name, fill=(0, 0, 0), font=font, anchor="mm", align="center")
+
     return template_img
 
 def generate_pdf_with_image(name, event):
