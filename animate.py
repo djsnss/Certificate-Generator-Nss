@@ -409,7 +409,7 @@ def is_name_in_csv(name, event):
         df["Name"] = df["Name"].str.strip().str.lower()
         return name.strip().lower() in df["Name"].values
     except Exception as e:
-        st.error(f"Error reading CSV file for {event}: {e}")
+        print(f"Error reading CSV file for {event}: {e}")
         return None  # None indicates an issue with the CSV file or the event not being configured
 def main():
     col1, col2 = st.columns([1, 4])
