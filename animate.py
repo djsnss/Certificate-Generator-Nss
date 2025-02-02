@@ -8,9 +8,6 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 import pandas as pd
 
-font_path = "/usr/share/fonts/truetype/msttcorefonts/Arial.ttf"  # Adjust path as needed
-font = ImageFont.truetype(font_path, 80)
-
 # Load logo image
 logo = Image.open("NSS.png").resize((150, 150))
 st.set_page_config(page_title="DJS NSS Event", page_icon=logo)
@@ -326,10 +323,10 @@ temp_css = """
 st.markdown(temp_css, unsafe_allow_html=True)
 
 def get_font(size=80):
-    try:
-        return ImageFont.truetype("playlist script.otf", size)
-    except OSError:
-        return ImageFont.truetype("font_path.ttf", size)
+    # try:
+    return ImageFont.truetype("playlist script.otf", size)
+    # except OSError:
+        # return ImageFont.truetype("arial.ttf", size)
 
 def overlay_name_on_template(name, event):
     templates = {
@@ -338,10 +335,6 @@ def overlay_name_on_template(name, event):
         "Grain-a-thon 2.0": "templates/grainathon.jpg",   
         "Participation": "templates/various.jpg"
     }
-    try:
-        font = ImageFont.truetype("playlist script.otf", 80)
-    except OSError:
-        font = ImageFont.truetype("arial.ttf", 80)  # or any available font
     template_img = Image.open(templates.get(event, "templates/various.jpg"))  
     draw = ImageDraw.Draw(template_img)
     font = get_font(80)
@@ -362,7 +355,7 @@ def generate_pdf_with_image(name, event):
     img_buffer = io.BytesIO()
     img_with_overlay.save(img_buffer, format="PNG")
     img_buffer.seek(0)
-
+    
     buffer = io.BytesIO()
     c = canvas.Canvas(buffer, pagesize=(img_with_overlay.width, img_with_overlay.height))
     img = ImageReader(img_buffer)
@@ -378,7 +371,7 @@ def is_name_in_csv(name):
         df["Name"] = df["Name"].str.strip().str.lower()
         return name.strip().lower() in df["Name"].values
     except Exception as e:
-        # st.error(f"Error reading CSV file: {e}")
+        st.error(f"Error reading CSV file: {e}")
         return False
 
 def send_email(name, event, email, pdf_buffer):
@@ -416,7 +409,7 @@ def is_name_in_csv(name, event):
         df["Name"] = df["Name"].str.strip().str.lower()
         return name.strip().lower() in df["Name"].values
     except Exception as e:
-        # print(f"Error reading CSV file for {event}: {e}")
+        st.error(f"Error reading CSV file for {event}: {e}")
         return None  # None indicates an issue with the CSV file or the event not being configured
 def main():
     col1, col2 = st.columns([1, 4])
