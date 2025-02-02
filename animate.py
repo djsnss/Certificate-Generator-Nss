@@ -8,6 +8,9 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 import pandas as pd
 
+font_path = "/usr/share/fonts/truetype/msttcorefonts/Arial.ttf"  # Adjust path as needed
+font = ImageFont.truetype(font_path, 80)
+
 # Load logo image
 logo = Image.open("NSS.png").resize((150, 150))
 st.set_page_config(page_title="DJS NSS Event", page_icon=logo)
@@ -326,7 +329,7 @@ def get_font(size=80):
     try:
         return ImageFont.truetype("playlist script.otf", size)
     except OSError:
-        return ImageFont.truetype("DejaVuSans-Bold.ttf", size)
+        return ImageFont.truetype("font_path.ttf", size)
 
 def overlay_name_on_template(name, event):
     templates = {
