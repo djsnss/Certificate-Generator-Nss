@@ -7,8 +7,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 import pandas as pd
 import os
-print(os.path.exists("playlist script.otf"))
-
+font_path = os.path.abspath("./times.ttf")
 # Load logo image
 logo = Image.open("NSS.png").resize((150, 150))
 st.set_page_config(page_title="DJS NSS Event", page_icon=logo)
@@ -338,9 +337,8 @@ def overlay_name_on_template(name, event):
     x = img_width / 2
     y = img_height / 2 - 50  
 
-    font = ImageFont.truetype("times.ttf", 80)  # Fallback font with correct size
-
-    draw.text((x, y), name, fill=(0, 0, 0), font=font, anchor="mm", align="center")
+    font = ImageFont.truetype(font_path, 80)
+    draw.text((x, y), name, fill=(0, 0, 0), anchor="mm", align="center", font=font)
 
     return template_img
 
@@ -408,16 +406,7 @@ def main():
             img_with_overlay = overlay_name_on_template(user_input, event)
             st.image(img_with_overlay, caption="Generated Certificate", use_container_width=True)            
             pdf_buffer = generate_pdf_with_image(user_input, event)
-            st.success("Certificate preview generated successfully!")
-            st.download_button(
-                label="Download Certificate PDF",
-                data=pdf_buffer,
-                file_name=f"{user_input}_{event}.pdf",
-                mime="application/pdf",
-                use_container_width=True
-            )
-            if st.button("Send Certificate via Email"):
-                send_email(user_input, event, email_input, pdf_buffer)
+            send_email(user_input, event, email_input, pdf_buffer)
             st.success("📨 You will receive the certificate on your email shortly. Please be patient.")
         else:
             st.warning("⚠️ Please enter a valid name and email.")
