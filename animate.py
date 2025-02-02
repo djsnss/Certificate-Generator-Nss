@@ -339,10 +339,7 @@ def overlay_name_on_template(name, event):
     x = img_width / 2
     y = img_height / 2 - 50  
 
-    try:
-        font = ImageFont.truetype("times.ttf", 80)  # More formal font
-    except:
-        font = ImageFont.load_default()  # Fallback if font not found
+    font = ImageFont.load_default(80)  # Fallback if font not found
 
     draw.text((x, y), name, fill=(0, 0, 0), font=font, anchor="mm", align="center")
 
