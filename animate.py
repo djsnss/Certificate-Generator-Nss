@@ -1,12 +1,13 @@
 import streamlit as st
 import io
 import smtplib
-import os
 from email.message import EmailMessage
 from PIL import Image, ImageDraw, ImageFont
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 import pandas as pd
+import os
+print(os.path.exists("playlist script.otf"))
 
 # Load logo image
 logo = Image.open("NSS.png").resize((150, 150))
@@ -322,11 +323,6 @@ temp_css = """
 """
 st.markdown(temp_css, unsafe_allow_html=True)
 
-def get_font(size=80):
-    # try:
-    return ImageFont.truetype("playlist script.otf", size)
-    # except OSError:
-        # return ImageFont.truetype("arial.ttf", size)
 
 def overlay_name_on_template(name, event):
     templates = {
@@ -337,17 +333,12 @@ def overlay_name_on_template(name, event):
     }
     template_img = Image.open(templates.get(event, "templates/various.jpg"))  
     draw = ImageDraw.Draw(template_img)
-    font = get_font(80)
-    
-    text_bbox = draw.textbbox((0, 0), name, font=font)
-    text_width = text_bbox[2] - text_bbox[0]
-    text_height = text_bbox[3] - text_bbox[1]
     
     img_width, img_height = template_img.size
-    x = (img_width - text_width) / 2
-    y = (img_height - text_height) / 2 - 80 
+    x = img_width / 2
+    y = img_height / 2 - 80 
     
-    draw.text((x, y), name, fill=(0, 0, 0), font=font)
+    draw.text((x, y), name, fill=(0, 0, 0))
     return template_img
 
 def generate_pdf_with_image(name, event):
@@ -376,18 +367,11 @@ def is_name_in_csv(name):
 
 def send_email(name, event, email, pdf_buffer):
     try:
-        template_path = f"email_templates/{event}.txt"
-        if os.path.exists(template_path):
-            with open(template_path, "r") as file:
-                message_body = file.read().format(name=name, event=event)
-        else:
-            message_body = f'Dear {name},\n\nWe are delighted to inform you that your participation in the {event} has been successfully acknowledged. It is our honor to present you with your personalized certificate as a token of your dedication and hard work. Please find your certificate attached to this email.\n\nThe National Service Scheme (NSS) is driven by the powerful motto: "Not Me But You". This principle emphasizes selfless service to society, fostering a spirit of volunteerism and community development. Through your participation, you have embodied this noble ideal, making a positive impact on the lives of those around you.\nYour commitment and contribution to this cause are truly commendable. By taking part in {event}, you have not only gained invaluable experiences but also contributed to a collective effort to bring about positive change. Your involvement strengthens the spirit of service that NSS stands for, and we are grateful for your willingness to dedicate your time and effort toward creating a better world.\n\nAs you receive this certificate, know that it represents not just your hard work but also the spirit of giving, compassion, and solidarity that the NSS upholds. We deeply appreciate your involvement and hope this experience inspires you to continue your journey of service and compassion.\n\nThank you once again for your outstanding participation. We look forward to your continued involvement in future NSS activities. Together, we can make a meaningful difference.\n\nAs you receive this certificate, know that it represents not just your hard work but also the spirit of giving, compassion, and solidarity that the NSS upholds. We deeply appreciate your involvement and hope this experience inspires you to continue your journey of service and compassion.\n\nThank you once again for your outstanding participation. We look forward to your continued involvement in future NSS activities. Together, we can make a meaningful difference.\n\nWarm regards,\nThe DJSNSS Team'
-        
         msg = EmailMessage()
         msg['Subject'] = f"Your Certificate for {event}"
-        msg['From'] = "djsnss2025@gmail.com"  # Change this to your email
+        msg['From'] = "djsnss2025@gmail.com"
         msg['To'] = email
-        msg.set_content(message_body)
+        msg.set_content(f"Dear {name},\n\nYour participation in {event} has been acknowledged. Your certificate is attached.")
         
         pdf_data = pdf_buffer.getvalue()
         msg.add_attachment(pdf_data, maintype='application', subtype='pdf', filename=f"{name}_{event}.pdf")
@@ -401,16 +385,7 @@ def send_email(name, event, email, pdf_buffer):
 
     except Exception as e:
         st.error(f"Error sending email: {e}")
-def is_name_in_csv(name, event):
-    try:
-        # Load the CSV specific to the event
-        file_path = f"attendance/{event.lower().replace(' ', '_')}.csv"  # Assuming the CSV is named based on event
-        df = pd.read_csv(file_path)
-        df["Name"] = df["Name"].str.strip().str.lower()
-        return name.strip().lower() in df["Name"].values
-    except Exception as e:
-        st.error(f"Error reading CSV file for {event}: {e}")
-        return None  # None indicates an issue with the CSV file or the event not being configured
+
 def main():
     col1, col2 = st.columns([1, 4])
     with col1:
@@ -424,20 +399,12 @@ def main():
     
     if st.button("Generate Certificate"):
         if user_input and email_input:
-            # Generalized check for attendance list
-            name_status = is_name_in_csv(user_input, event)
-            if name_status is None:  # If the CSV file doesn't exist or there's an issue
-                st.warning("⚠️ We have a delay for this event. Please try again after some time.")
-                return
-            if not name_status:  # If the name is not found in the attendance list
+            if not is_name_in_csv(user_input):
                 st.warning(f"⚠️ Name not found in the attendance list for {event}.")
                 return
-            # Generate the certificate
             img_with_overlay = overlay_name_on_template(user_input, event)
             st.image(img_with_overlay, caption="Generated Certificate", use_container_width=True)            
-            # Generate PDF with the certificate image
             pdf_buffer = generate_pdf_with_image(user_input, event)
-            # Show success message and download button
             st.success("Certificate preview generated successfully!")
             st.download_button(
                 label="Download Certificate PDF",
@@ -448,7 +415,6 @@ def main():
             )
             send_email(user_input, event, email_input, pdf_buffer)
             st.success("📨 You will receive the certificate on your email shortly. Please be patient.")
-            
         else:
             st.warning("⚠️ Please enter a valid name and email.")
 
