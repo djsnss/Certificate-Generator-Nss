@@ -335,6 +335,10 @@ def overlay_name_on_template(name, event):
         "Grain-a-thon 2.0": "templates/grainathon.jpg",   
         "Participation": "templates/various.jpg"
     }
+    try:
+        font = ImageFont.truetype("playlist script.otf", 80)
+    except OSError:
+        font = ImageFont.truetype("arial.ttf", 80)  # or any available font
     template_img = Image.open(templates.get(event, "templates/various.jpg"))  
     draw = ImageDraw.Draw(template_img)
     font = get_font(80)
@@ -355,7 +359,7 @@ def generate_pdf_with_image(name, event):
     img_buffer = io.BytesIO()
     img_with_overlay.save(img_buffer, format="PNG")
     img_buffer.seek(0)
-    
+
     buffer = io.BytesIO()
     c = canvas.Canvas(buffer, pagesize=(img_with_overlay.width, img_with_overlay.height))
     img = ImageReader(img_buffer)
