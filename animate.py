@@ -326,7 +326,7 @@ def get_font(size=80):
     try:
         return ImageFont.truetype("playlist script.otf", size)
     except OSError:
-        return ImageFont.truetype("arial.ttf", size)
+        return ImageFont.truetype("DejaVuSans-Bold.ttf", size)
 
 def overlay_name_on_template(name, event):
     templates = {
@@ -375,7 +375,7 @@ def is_name_in_csv(name):
         df["Name"] = df["Name"].str.strip().str.lower()
         return name.strip().lower() in df["Name"].values
     except Exception as e:
-        st.error(f"Error reading CSV file: {e}")
+        # st.error(f"Error reading CSV file: {e}")
         return False
 
 def send_email(name, event, email, pdf_buffer):
@@ -413,7 +413,7 @@ def is_name_in_csv(name, event):
         df["Name"] = df["Name"].str.strip().str.lower()
         return name.strip().lower() in df["Name"].values
     except Exception as e:
-        print(f"Error reading CSV file for {event}: {e}")
+        # print(f"Error reading CSV file for {event}: {e}")
         return None  # None indicates an issue with the CSV file or the event not being configured
 def main():
     col1, col2 = st.columns([1, 4])
