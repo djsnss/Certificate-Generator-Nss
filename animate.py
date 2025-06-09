@@ -327,7 +327,7 @@ def overlay_name_on_template(name, event):
         "NSS Camp 2025": "templates/camp.jpg",  
         "Stem Cell Donation Drive": "templates/stemcell.jpg",  
         "Grain-a-thon 2.0": "templates/grainathon.jpg",   
-        "Participation": "templates/various.jpg"
+    
     }
     template_img = Image.open(templates.get(event, "templates/various.jpg"))  
     draw = ImageDraw.Draw(template_img)
@@ -396,7 +396,7 @@ def main():
     
     user_input = st.text_input("Enter your full name:", key="name_input").strip().title()
     email_input = st.text_input("Enter your email:", key="email_input").strip()
-    event = st.selectbox("Select Event", ["NSS Camp 2025", "Stem Cell Donation Drive", "Grain-a-thon 2.0", "Participation"])
+    event = st.selectbox("Select Event", ["NSS Camp 2025", "Stem Cell Donation Drive", "Grain-a-thon 2.0"])
     
     if st.button("Generate Certificate"):
         if user_input and email_input:
