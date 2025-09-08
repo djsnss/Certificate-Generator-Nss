@@ -7,6 +7,14 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 import pandas as pd
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
+EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
+EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
+
 font_path = os.path.abspath("./geraldine.ttf") #times new roman font
 # Load logo image
 logo = Image.open("NSS.png").resize((150, 150))
@@ -140,7 +148,7 @@ def send_email(name, event_display, email, pdf_buffer):
     try:
         msg = EmailMessage()
         msg['Subject'] = f"Your Certificate for {event_display}"
-        msg['From'] = "djnss.official@gmail.com"
+        msg['From'] = EMAIL_ADDRESS
         msg['To'] = email
         msg.set_content(f"Dear {name},\n\nThank you for your valuable participation in {event_display}.\nWe truly appreciate your involvement and contribution.\n\nPlease find your certificate of participation attached to this email.\n\nBest regards,\nDJS NSS")
         
@@ -151,7 +159,7 @@ def send_email(name, event_display, email, pdf_buffer):
             server.ehlo()
             server.starttls()
             server.ehlo()
-            server.login("djnss.official@gmail.com", "egrj vnpi twfj iltr") 
+            server.login(EMAIL_ADDRESS, EMAIL_PASSWORD) 
             # Use your app password here
             # Google account > Security > App passwords > Create new password
             server.send_message(msg)
