@@ -15,7 +15,7 @@ load_dotenv()
 EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 
-font_path = os.path.abspath("./geraldine.ttf") #times new roman font
+font_path = os.path.abspath("./lavonia.otf") #times new roman font
 # Load logo image
 logo = Image.open("NSS.png").resize((150, 150))
 st.set_page_config(page_title="DJS NSS Event", page_icon=logo)
