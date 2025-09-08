@@ -7,7 +7,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 import pandas as pd
 import os
-font_path = os.path.abspath("./times.ttf")
+font_path = os.path.abspath("./geraldine.ttf") #times new roman font
 # Load logo image
 logo = Image.open("NSS.png").resize((150, 150))
 st.set_page_config(page_title="DJS NSS Event", page_icon=logo)
@@ -90,7 +90,8 @@ simple_css = """
 st.markdown(simple_css, unsafe_allow_html=True)
 # Map display names to file-safe names
 EVENTS = {
-    "NSS Camp 2025": "nss_camp_2025"
+    # "NSS Camp 2025": "nss_camp_2025",
+    "Juhu Beach Cleanup": "beach_cleanup_2025"
     # "Stem Cell Donation Drive": "stem_cell_donation_drive"
 }
 
@@ -102,9 +103,9 @@ def overlay_name_on_template(name, event_display):
 
     img_width, img_height = template_img.size
     x = img_width / 2
-    y = img_height / 2 - 50
+    y = img_height / 2 - 100 #50
 
-    font = ImageFont.truetype(font_path, 80)
+    font = ImageFont.truetype(font_path, 120) #80 font size
     draw.text((x, y), name, fill=(0, 0, 0), anchor="mm", align="center", font=font)
 
     return template_img
