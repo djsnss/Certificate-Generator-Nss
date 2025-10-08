@@ -15,7 +15,7 @@ load_dotenv()
 EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 
-font_path = os.path.abspath("./Alice-Regular.ttf") #times new roman font
+font_path = os.path.abspath("./lavonia.otf") #times new roman font
 # Load logo image
 logo = Image.open("NSS.png").resize((150, 150))
 st.set_page_config(page_title="DJS NSS Event", page_icon=logo)
@@ -99,85 +99,27 @@ st.markdown(simple_css, unsafe_allow_html=True)
 # Map display names to file-safe names
 EVENTS = {
     # "NSS Camp 2025": "nss_camp_2025",
-    # "Juhu Beach Cleanup": "beach_cleanup_2025",
-    "Grainathon 3.0": "grainathon25",
+    "Juhu Beach Cleanup": "beach_cleanup_2025"
+    # "Stem Cell Donation Drive": "stem_cell_donation_drive"
 }
 
-# Add per-event relative positions (fractions of width/height).
-# Adjust these (0.0-1.0) until name/quantity appear where you want on the template.
-POSITIONS = {
-    # event_key: { "name": (rel_x, rel_y), "quantity": (rel_x, rel_y) }
-    "grainathon25": {
-        "name": (0.50, 0.40),      # centered horizontally, 40% down from top
-        "quantity": (0.352, 0.57),  # centered horizontally, 55% down from top
-    },
-}
-
-def get_attendee_quantity(name, event_display):
-    """
-    Return the quantity value for `name` in the event CSV.
-    Tries common column names: Quantity, quantity, Qty, qty.
-    Returns None if name not found or no qty column.
-    """
-    event_key = EVENTS[event_display]
-    csv_path = f"attendance/{event_key}.csv"
-    try:
-        df = pd.read_csv(csv_path)
-        # find a Name-like column (case-insensitive)
-        name_cols = [c for c in df.columns if c.strip().lower() == "name"]
-        if not name_cols:
-            return None
-        name_col = name_cols[0]
-        df["Name_norm"] = df[name_col].astype(str).str.strip().str.lower()
-        name_norm = name.strip().lower()
-        matched = df[df["Name_norm"] == name_norm]
-        if matched.empty:
-            return None
-        # try common quantity column names
-        for col in ("Quantity", "quantity", "Qty", "qty"):
-            if col in df.columns:
-                val = matched.iloc[0][col]
-                return None if pd.isna(val) else val
-        return None
-    except Exception as e:
-        st.error(f"Error reading CSV file: {e}")
-        return None
-
-def overlay_name_on_template(name, event_display, quantity=None):
+def overlay_name_on_template(name, event_display):
     event_key = EVENTS[event_display]
     template_path = f"templates/{event_key}.jpg"
     template_img = Image.open(template_path)
     draw = ImageDraw.Draw(template_img)
 
     img_width, img_height = template_img.size
+    x = img_width / 2
+    y = img_height / 2 - 100 #50
 
-    # lookup positions (fallback to centered)
-    pos = POSITIONS.get(event_key, {})
-    name_rel = pos.get("name", (0.5, 0.5))
-    qty_rel = pos.get("quantity", (0.5, 0.6))
-
-    name_x = int(img_width * name_rel[0])
-    name_y = int(img_height * name_rel[1])
-    qty_x = int(img_width * qty_rel[0])
-    qty_y = int(img_height * qty_rel[1])
-
-    # Draw name
-    font_name = ImageFont.truetype(font_path, 120)
-    draw.text((name_x, name_y), name, fill=(0, 0, 0), anchor="mm", align="center", font=font_name)
-
-    # Draw quantity at its own position if provided
-    if quantity is not None and str(quantity).strip() != "":
-        qty_text = f"{quantity}"
-        try:
-            font_qty = ImageFont.truetype(font_path, 50)
-            draw.text((qty_x, qty_y), qty_text, fill=(0, 0, 0), anchor="mm", align="center", font=font_qty)
-        except Exception:
-            draw.text((qty_x, qty_y), qty_text, fill=(0, 0, 0), anchor="mm", align="center")
+    font = ImageFont.truetype(font_path, 120) #80 font size
+    draw.text((x, y), name, fill=(0, 0, 0), anchor="mm", align="center", font=font)
 
     return template_img
 
-def generate_pdf_with_image(name, event_display, quantity=None):
-    img_with_overlay = overlay_name_on_template(name, event_display, quantity)
+def generate_pdf_with_image(name, event_display):
+    img_with_overlay = overlay_name_on_template(name, event_display)
     img_buffer = io.BytesIO()
     img_with_overlay.save(img_buffer, format="PNG")
     img_buffer.seek(0)
@@ -191,34 +133,35 @@ def generate_pdf_with_image(name, event_display, quantity=None):
     buffer.seek(0)
     return buffer
 
-def send_email(name, event_display, email, pdf_buffer, quantity=None):
+def is_name_in_csv(name, event_display):
+    event_key = EVENTS[event_display]
+    csv_path = f"attendance/{event_key}.csv"
+    try:
+        df = pd.read_csv(csv_path)
+        df["Name"] = df["Name"].str.strip().str.lower()
+        return name.strip().lower() in df["Name"].values
+    except Exception as e:
+        st.error(f"Error reading CSV file: {e}")
+        return False
+
+def send_email(name, event_display, email, pdf_buffer):
     try:
         msg = EmailMessage()
-        subj_qty = f" - Qty:{quantity}" if quantity is not None else ""
-        msg['Subject'] = f"Your Certificate for {event_display}{subj_qty}"
+        msg['Subject'] = f"Your Certificate for {event_display}"
         msg['From'] = EMAIL_ADDRESS
         msg['To'] = email
-
-        body = f"Dear {name},\n\nThank you for your participation in {event_display}."
-        if quantity is not None:
-            body += f"\nRecorded quantity: {quantity}."
-        body += "\n\nPlease find your certificate attached.\n\nBest regards,\nDJS NSS"
-
-        msg.set_content(body)
+        msg.set_content(f"Dear {name},\n\nThank you for your valuable participation in {event_display}.\nWe truly appreciate your involvement and contribution.\n\nPlease find your certificate of participation attached to this email.\n\nBest regards,\nDJS NSS")
         
         pdf_data = pdf_buffer.getvalue()
-        filename = f"{name}_{event_display}"
-        if quantity is not None:
-            filename += f"_qty{quantity}"
-        filename += ".pdf"
-
-        msg.add_attachment(pdf_data, maintype='application', subtype='pdf', filename=filename)
+        msg.add_attachment(pdf_data, maintype='application', subtype='pdf', filename=f"{name}_{event_display}.pdf")
         
         with smtplib.SMTP("smtp.gmail.com", 587) as server:
             server.ehlo()
             server.starttls()
             server.ehlo()
-            server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+            server.login(EMAIL_ADDRESS, EMAIL_PASSWORD) 
+            # Use your app password here
+            # Google account > Security > App passwords > Create new password
             server.send_message(msg)
 
     except Exception as e:
@@ -237,14 +180,13 @@ def main():
     
     if st.button("Generate Certificate"):
         if user_input and email_input:
-            quantity = get_attendee_quantity(user_input, event_display)
-            if quantity is None:
-                st.warning(f"⚠️ Name not found in the attendance list for {event_display} or quantity missing.")
+            if not is_name_in_csv(user_input, event_display):
+                st.warning(f"⚠️ Name not found in the attendance list for {event_display}.")
                 return
-            img_with_overlay = overlay_name_on_template(user_input, event_display, quantity)
+            img_with_overlay = overlay_name_on_template(user_input, event_display)
             st.image(img_with_overlay, caption="Generated Certificate", use_container_width=True)            
-            pdf_buffer = generate_pdf_with_image(user_input, event_display, quantity)
-            send_email(user_input, event_display, email_input, pdf_buffer, quantity)
+            pdf_buffer = generate_pdf_with_image(user_input, event_display)
+            send_email(user_input, event_display, email_input, pdf_buffer)
             st.success("📨 You will receive the certificate on your email shortly. Please be patient.")
         else:
             st.warning("⚠️ Please enter a valid name and email.")
