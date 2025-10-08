@@ -200,16 +200,12 @@ def send_email(name, event_display, email, pdf_buffer, quantity=None):
         msg['To'] = email
 
         body = f"Dear {name},\n\nThank you for your participation in {event_display}."
-        if quantity is not None:
-            body += f"\nRecorded quantity: {quantity}."
         body += "\n\nPlease find your certificate attached.\n\nBest regards,\nDJS NSS"
 
         msg.set_content(body)
         
         pdf_data = pdf_buffer.getvalue()
         filename = f"{name}_{event_display}"
-        if quantity is not None:
-            filename += f"_qty{quantity}"
         filename += ".pdf"
 
         msg.add_attachment(pdf_data, maintype='application', subtype='pdf', filename=filename)
