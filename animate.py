@@ -194,8 +194,7 @@ def generate_pdf_with_image(name, event_display, quantity=None):
 def send_email(name, event_display, email, pdf_buffer, quantity=None):
     try:
         msg = EmailMessage()
-        subj_qty = f" - Qty:{quantity}" if quantity is not None else ""
-        msg['Subject'] = f"Your Certificate for {event_display}{subj_qty}"
+        msg['Subject'] = f"Your Certificate for {event_display}"
         msg['From'] = EMAIL_ADDRESS
         msg['To'] = email
 
