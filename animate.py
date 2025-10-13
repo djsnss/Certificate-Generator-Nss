@@ -195,7 +195,7 @@ def send_email(name, event_display, email, pdf_buffer, quantity=None):
     try:
         msg = EmailMessage()
         msg['Subject'] = f"Your Certificate for {event_display}"
-        msg['From'] = EMAIL_ADDRESS
+        msg['From'] = f"DJSNSS<{EMAIL_ADDRESS}>"
         msg['To'] = email
 
         body = f"Dear {name},\n\nThank you for your participation in {event_display}."
@@ -239,8 +239,8 @@ def main():
             img_with_overlay = overlay_name_on_template(user_input, event_display, quantity)
             st.image(img_with_overlay, caption="Generated Certificate", use_container_width=True)            
             pdf_buffer = generate_pdf_with_image(user_input, event_display, quantity)
-            send_email(user_input, event_display, email_input, pdf_buffer, quantity)
             st.success("📨 You will receive the certificate on your email shortly. Please be patient.")
+            send_email(user_input, event_display, email_input, pdf_buffer, quantity)
         else:
             st.warning("⚠️ Please enter a valid name and email.")
 
