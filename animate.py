@@ -167,9 +167,17 @@ def overlay_name_on_template(name, event_display, quantity=None):
 
     # Draw quantity at its own position if provided
     if quantity is not None and str(quantity).strip() != "":
-        qty_text = str(quantity)
+        # Format: show as integer if whole, else as float
         try:
-            font_qty = ImageFont.truetype(font_path, 40)
+            qty_val = float(quantity)
+            if qty_val.is_integer():
+                qty_text = str(int(qty_val))
+            else:
+                qty_text = str(qty_val)
+        except Exception:
+            qty_text = str(quantity)
+        try:
+            font_qty = ImageFont.truetype(font_path, 45)
             draw.text((qty_x, qty_y), qty_text, fill=(0, 0, 0), anchor="mm", align="center", font=font_qty)
         except Exception:
             draw.text((qty_x, qty_y), qty_text, fill=(0, 0, 0), anchor="mm", align="center")
