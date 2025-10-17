@@ -249,6 +249,14 @@ def main():
             pdf_buffer = generate_pdf_with_image(user_input, event_display, quantity)
             st.success("📨 You will receive the certificate on your email shortly. Please be patient.")
             send_email(user_input, event_display, email_input, pdf_buffer, quantity)
+            
+            # Download button for PDF
+            st.download_button(
+                label="Download Certificate as PDF",
+                data=pdf_buffer.getvalue(),
+                file_name=f"{user_input}_{event_display}.pdf",
+                mime="application/pdf"
+            )
         else:
             st.warning("⚠️ Please enter a valid name and email.")
 
