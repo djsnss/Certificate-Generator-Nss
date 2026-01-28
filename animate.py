@@ -1,7 +1,6 @@
 import streamlit as st
 import io
 import smtplib
-from email.message import EmailMessage
 from PIL import Image, ImageDraw, ImageFont
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
@@ -199,33 +198,6 @@ def generate_pdf_with_image(name, event_display, quantity=None):
     buffer.seek(0)
     return buffer
 
-def send_email(name, event_display, email, pdf_buffer, quantity=None):
-    try:
-        msg = EmailMessage()
-        msg['Subject'] = f"Your Certificate for {event_display}"
-        msg['From'] = f"DJSNSS<{EMAIL_ADDRESS}>"
-        msg['To'] = email
-
-        body = f"Dear {name},\n\nThank you for your participation in {event_display}."
-        body += "\n\nPlease find your certificate attached.\n\nBest regards,\nDJS NSS"
-
-        msg.set_content(body)
-        
-        pdf_data = pdf_buffer.getvalue()
-        filename = f"{name}_{event_display}"
-        filename += ".pdf"
-
-        msg.add_attachment(pdf_data, maintype='application', subtype='pdf', filename=filename)
-        
-        with smtplib.SMTP("smtp.gmail.com", 587) as server:
-            server.ehlo()
-            server.starttls()
-            server.ehlo()
-            server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
-            server.send_message(msg)
-
-    except Exception as e:
-        st.error(f"Error sending email: {e}")
 
 def main():
     col1, col2 = st.columns([1, 4])
@@ -247,9 +219,7 @@ def main():
             img_with_overlay = overlay_name_on_template(user_input, event_display, quantity)
             st.image(img_with_overlay, caption="Generated Certificate", use_container_width=True)            
             pdf_buffer = generate_pdf_with_image(user_input, event_display, quantity)
-            st.success("📨 You will receive the certificate on your email shortly. Please be patient.")
-            send_email(user_input, event_display, email_input, pdf_buffer, quantity)
-            
+            st.success("📨 You can download your certificate.")
             # Download button for PDF
             st.download_button(
                 label="Download Certificate as PDF",
